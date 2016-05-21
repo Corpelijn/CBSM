@@ -30,6 +30,12 @@ namespace CBSM.Domain
             set { this.username = value; }
         }
 
+        public string Password
+        {
+            get { return this.password; }
+            set { this.password = value; }
+        }
+
         public int Recht
         {
             get { return this.recht; }

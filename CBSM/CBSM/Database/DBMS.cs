@@ -42,6 +42,13 @@ namespace CBSM.Database
                 if (!(field.GetCustomAttributes(typeof(DBMSIgnore), false).Length > 0))
                 {
                     TableColumn tc = new TableColumn(field.Name, field.FieldType);
+
+                    if (field.FieldType.IsSubclassOf(typeof(DBMS)))
+                    {
+                        tc.IsForeignKey = true;
+                        tc.Type = typeof(int);
+                    }
+
                     if(field.GetCustomAttributes(typeof(DBMSPrimayKey), false).Length > 0)
                         tc.PrimaryKey = true;
 
@@ -133,10 +140,19 @@ namespace CBSM.Database
             StringBuilder query = new StringBuilder();
 
             query.Append("insert into ").Append(this.GetType().Name).Append(" (");
-            foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey) }))
+            foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey), typeof(DBMSIgnore) }))
             {
                 query.Append(fi.Name).Append(",");
-                data.Add(fi.GetValue(this));
+                if (fi.GetValue(this).GetType().IsSubclassOf(typeof(DBMS)))
+                {
+                    DBMS obj = (DBMS)fi.GetValue(this);
+                    data.Add(obj.GetIdForForeignKey());
+                    DatabaseManager.AddForeignKeyReference(this.GetType().Name, fi.Name, obj);
+                }
+                else
+                {
+                    data.Add(fi.GetValue(this));
+                }
             }
 
             query.Remove(query.Length - 1, 1).Append(") values (");
@@ -160,10 +176,18 @@ namespace CBSM.Database
             StringBuilder query = new StringBuilder();
 
             query.Append("update ").Append(this.GetType().Name).Append(" set ");
-            foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey) }))
+            foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey), typeof(DBMSIgnore) }))
             {
                 query.Append(fi.Name).Append("=?,");
-                data.Add(fi.GetValue(this));
+                if (fi.GetValue(this).GetType().IsSubclassOf(typeof(DBMS)))
+                {
+                    DBMS obj = (DBMS)fi.GetValue(this);
+                    data.Add(obj.GetIdForForeignKey());
+                }
+                else
+                {
+                    data.Add(fi.GetValue(this));
+                }
             }
 
             query.Remove(query.Length - 1, 1);
@@ -200,6 +224,15 @@ namespace CBSM.Database
                 }
             }
         }
+
+        private int GetIdForForeignKey()
+        {
+            if (id == -1)
+            {
+                WriteToDatabase();
+            }
+            return id;
+        }
     }
 
     public class DBMS<T> : DBMS where T : new()
@@ -217,9 +250,17 @@ namespace CBSM.Database
             return data.ToArray();
         }
 
-        public static T[] GetFromDatabase(params object[] constraints)
+        public static T[] GetFromDatabase(string whereclause, params object[] parameters)
         {
-            return null;
+            DataTable dt = DatabaseManager.ExecuteQuery("select id from " + typeof(T).Name + " where " + whereclause, parameters);
+
+            List<T> data = new List<T>();
+            foreach (DataRow row in dt)
+            {
+                data.Add(GetFromDatabaseById(int.Parse(row.GetData("id").ToString())));
+            }
+
+            return data.ToArray();
         }
 
         public static T GetFromDatabaseById(int id)
@@ -237,11 +278,20 @@ namespace CBSM.Database
             if (mi != null)
             {
                 List<FieldInfo> fields = (List<FieldInfo>)mi.Invoke(instance, new object[] {new Type[] {}});
+                List<ForeignKey> fk = new List<ForeignKey>(DatabaseManager.GetForeignKeys(instance.GetType().Name));
 
                 DataTable dt = DatabaseManager.ExecuteQuery("select * from " + instance.GetType().Name + " where id=?", id);
                 foreach (FieldInfo fi in fields)
                 {
-                    fi.SetValue(instance, dt.GetValueFromRow(0, fi.Name));
+                    ForeignKey foreignKey = fk.Find(f => f.Column == fi.Name);
+                    if (foreignKey != null)
+                    {
+                        fi.SetValue(instance, DatabaseManager.GetObjectFromForeignKey(foreignKey, int.Parse(dt.GetValueFromRow(0, fi.Name).ToString())));
+                    }
+                    else
+                    {
+                        fi.SetValue(instance, dt.GetValueFromRow(0, fi.Name));
+                    }
                 }
             }
             else

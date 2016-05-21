@@ -12,7 +12,7 @@ namespace TestApplication
         {
             DatabaseManager.AddConnection("localhost", "bmt", "root", "");
 
-            Account[] accounts = Account.GetAllFromDatabase();
+            Season[] s = Season.GetAllFromDatabase();
 
             Console.ReadKey();
         }

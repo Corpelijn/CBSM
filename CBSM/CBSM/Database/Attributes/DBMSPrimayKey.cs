@@ -10,7 +10,7 @@ namespace CBSM.Database.Attributes
     /// This attribute tells the DBMS that the following field is the primary key of the table
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Field)]
-    public class DBMSPrimayKey : System.Attribute
+    class DBMSPrimayKey : System.Attribute
     {
     }
 }

@@ -12,12 +12,14 @@ namespace CBSM.Database
         private object defaultvalue;
         private bool nullable;
         private bool unique;
+        private bool foreignkey;
 
         public TableColumn(string name, Type type)
         {
             this.name = name;
             this.type = type;
             this.nullable = true;
+            foreignkey = false;
         }
 
         public string Name
@@ -28,6 +30,13 @@ namespace CBSM.Database
         public Type Type
         {
             get { return type; }
+            set { type = value; }
+        }
+
+        public bool IsForeignKey
+        {
+            get { return foreignkey; }
+            set { foreignkey = value; }
         }
 
         public bool PrimaryKey
