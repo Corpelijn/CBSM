@@ -174,6 +174,9 @@ namespace CBSM.Database
                     sb.Append("\tauto_increment primary key");
                 else
                 {
+                    if (c.ForeignKey != null)
+                        c.ForeignKey.WriteToDatabase();
+
                     if (c.Nullable)
                         sb.Append("\tnull");
                     else

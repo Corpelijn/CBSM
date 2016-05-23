@@ -14,6 +14,12 @@ namespace TestApplication
 
             Season[] s = Season.GetAllFromDatabase();
 
+            //Serie s = new Serie("Frank and Dale", "F&D");
+            //Season s1 = new Season(1, "Police and criminal", s);
+            //s1.WriteToDatabase();
+
+            Console.WriteLine();
+            Console.WriteLine("All done . . .");
             Console.ReadKey();
         }
     }

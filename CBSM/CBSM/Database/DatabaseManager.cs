@@ -67,18 +67,18 @@ namespace CBSM.Database
             GetInstance().GetCurrentConnection().CreateTable(name, columns);
         }
 
-        public static void AddForeignKeyReference(string table, string column, DBMS destinationtable)
+        public static void AddForeignKeyReference(string table, string column, string destinationtable)
         {
-            ForeignKey fk = new ForeignKey(table, column, destinationtable);
+            __ForeignKey fk = new __ForeignKey(table, column, destinationtable);
             fk.WriteToDatabase();
         }
 
-        public static ForeignKey[] GetForeignKeys(string table)
+        public static __ForeignKey[] GetForeignKeys(string table)
         {
-            return ForeignKey.GetFromDatabase("sourcetable=?", table);
+            return __ForeignKey.GetFromDatabase("sourcetable=?", table);
         }
 
-        public static object GetObjectFromForeignKey(ForeignKey fk, int id)
+        public static object GetObjectFromForeignKey(__ForeignKey fk, int id)
         {
             Type t = Type.GetType(fk.DestinationTable);
             MethodInfo mi = null;

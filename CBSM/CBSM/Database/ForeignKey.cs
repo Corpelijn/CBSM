@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace CBSM.Database
 {
-    public class ForeignKey : DBMS<ForeignKey>
+    public class __ForeignKey : DBMS<__ForeignKey>
     {
         private string sourcetable;
         private string sourcecolumn;
         private string destinationtable;
 
-        public ForeignKey(string table, string column, DBMS destinationtable)
+        public __ForeignKey(string table, string column, string destinationtable)
         {
             this.sourcetable = table;
             this.sourcecolumn = column;
-            this.destinationtable = destinationtable.GetType().FullName;
+            this.destinationtable = destinationtable;
         }
 
-        public ForeignKey()
+        public __ForeignKey()
         {
 
         }

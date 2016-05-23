@@ -45,7 +45,7 @@ namespace CBSM.Database
 
                     if (field.FieldType.IsSubclassOf(typeof(DBMS)))
                     {
-                        tc.IsForeignKey = true;
+                        tc.ForeignKey = new __ForeignKey(this.GetType().Name, field.Name, field.FieldType.FullName);
                         tc.Type = typeof(int);
                     }
 
@@ -147,7 +147,6 @@ namespace CBSM.Database
                 {
                     DBMS obj = (DBMS)fi.GetValue(this);
                     data.Add(obj.GetIdForForeignKey());
-                    DatabaseManager.AddForeignKeyReference(this.GetType().Name, fi.Name, obj);
                 }
                 else
                 {
@@ -278,12 +277,12 @@ namespace CBSM.Database
             if (mi != null)
             {
                 List<FieldInfo> fields = (List<FieldInfo>)mi.Invoke(instance, new object[] {new Type[] {}});
-                List<ForeignKey> fk = new List<ForeignKey>(DatabaseManager.GetForeignKeys(instance.GetType().Name));
+                List<__ForeignKey> fk = new List<__ForeignKey>(DatabaseManager.GetForeignKeys(instance.GetType().Name));
 
                 DataTable dt = DatabaseManager.ExecuteQuery("select * from " + instance.GetType().Name + " where id=?", id);
                 foreach (FieldInfo fi in fields)
                 {
-                    ForeignKey foreignKey = fk.Find(f => f.Column == fi.Name);
+                    __ForeignKey foreignKey = fk.Find(f => f.Column == fi.Name);
                     if (foreignKey != null)
                     {
                         fi.SetValue(instance, DatabaseManager.GetObjectFromForeignKey(foreignKey, int.Parse(dt.GetValueFromRow(0, fi.Name).ToString())));
