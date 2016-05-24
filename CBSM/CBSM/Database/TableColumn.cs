@@ -22,6 +22,10 @@ namespace CBSM.Database
             foreignkey = null;
         }
 
+        protected TableColumn()
+        {
+        }
+
         public string Name
         {
             get { return name; }

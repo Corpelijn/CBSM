@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using CBSM.Database.Attributes;
+using System.Collections;
+using CBSM.Database.Columns;
 
 namespace CBSM.Database
 {
@@ -32,40 +34,56 @@ namespace CBSM.Database
             WriteData();
         }
 
-        private List<TableColumn> GetColumns()
+        private List<FieldToColumn> GetColumns()
         {
             List<FieldInfo> fields = GetColumnsAsFields();
 
-            List<TableColumn> columns = new List<TableColumn>();
+            List<FieldToColumn> columns = new List<FieldToColumn>();
             foreach (FieldInfo field in fields)
             {
                 if (!(field.GetCustomAttributes(typeof(DBMSIgnore), false).Length > 0))
                 {
-                    TableColumn tc = new TableColumn(field.Name, field.FieldType);
+                    FieldToColumn col = new DataColumn(field.Name, field.FieldType);
+                    //TableColumn tc = new TableColumn(field.Name, field.FieldType);
+                    
+                    //// Check for a collection
+                    //if (field.FieldType.GetInterface("ICollection") != null)
+                    //{
+                    //    ICollection c = (ICollection)field.GetValue(this);
+                    //    if (c.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(DBMS)))
+                    //    {
+                    //        Console.WriteLine("linktable met vage klassen");
+                    //    }
+                    //    else
+                    //    {
 
-                    if (field.FieldType.IsSubclassOf(typeof(DBMS)))
-                    {
-                        tc.ForeignKey = new __ForeignKey(this.GetType().Name, field.Name, field.FieldType.FullName);
-                        tc.Type = typeof(int);
-                    }
+                    //    }
+                    //}
+                    //else
+                    //{
+                        if (field.FieldType.IsSubclassOf(typeof(DBMS)))
+                        {
+                            col = new ForeignKeyColumn(new __ForeignKey(this.GetType().Name, field.Name, field.FieldType.FullName));
+                        }
 
-                    if(field.GetCustomAttributes(typeof(DBMSPrimayKey), false).Length > 0)
-                        tc.PrimaryKey = true;
+                        if (field.GetCustomAttributes(typeof(DBMSPrimayKey), false).Length > 0)
+                            col = new PrimaryKeyColumn(field.Name, field.FieldType);
 
-                    if (field.GetCustomAttributes(typeof(DBMSDefaultValue), false).Length > 0)
-                    {
-                        List<CustomAttributeData> data = new List<CustomAttributeData>(field.GetCustomAttributesData());
-                        CustomAttributeData val = data.Find(f => f.AttributeType == typeof(DBMSDefaultValue));
-                        tc.DefaultValue = val.ConstructorArguments[0].Value;
-                    }
+                        if (field.GetCustomAttributes(typeof(DBMSDefaultValue), false).Length > 0)
+                        {
+                            List<CustomAttributeData> data = new List<CustomAttributeData>(field.GetCustomAttributesData());
+                            CustomAttributeData val = data.Find(f => f.AttributeType == typeof(DBMSDefaultValue));
+                            ((DataColumn)col).DefaultValue = val.ConstructorArguments[0].Value;
+                        }
 
-                    if (field.GetCustomAttributes(typeof(DBMSUnique), false).Length > 0)
-                        tc.Unique = true;
+                        if (field.GetCustomAttributes(typeof(DBMSUnique), false).Length > 0)
+                            ((DataColumn)col).Unique = true;
 
-                    if (field.GetCustomAttributes(typeof(DBMSNotNull), false).Length > 0)
-                        tc.Nullable = false;
+                        if (field.GetCustomAttributes(typeof(DBMSNotNull), false).Length > 0)
+                            ((DataColumn)col).Nullable = false;
+                    //}
 
-                    columns.Add(tc);
+                    columns.Add(col);
                 }
             }
 
@@ -106,30 +124,30 @@ namespace CBSM.Database
 
         private void CheckColumns()
         {
-            List<TableColumn> columns = GetColumns();
-            foreach (TableColumn column in columns)
+            List<FieldToColumn> columns = GetColumns();
+            foreach (FieldToColumn column in columns)
             {
                 int length = 0;
-                if (column.Type == typeof(string))
+                if (column.ColumnType == typeof(string))
                 {
                     Type baseClass = this.GetType();
                     FieldInfo field =null;
                     while (baseClass != typeof(object))
                     {
-                        field = baseClass.GetField(column.Name, BindingFlags.Instance | BindingFlags.NonPublic);
+                        field = baseClass.GetField(column.ColumnName, BindingFlags.Instance | BindingFlags.NonPublic);
                         if (field != null)
                             break;
                         baseClass = baseClass.BaseType;
                     }
                     length = field.GetValue(this).ToString().Length;
                 }
-                DatabaseManager.CheckOrAlterColumn(this.GetType().Name, column.Name, column.Type, length);
+                DatabaseManager.CheckOrAlterColumn(this.GetType().Name, column.ColumnName, column.ColumnType, length);
             }
         }
 
         private void CreateTable()
         {
-            List<TableColumn> columns = GetColumns();
+            List<FieldToColumn> columns = GetColumns();
 
             DatabaseManager.CreateTable(this.GetType().Name, columns);
         }

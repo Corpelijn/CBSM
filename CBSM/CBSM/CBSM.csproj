@@ -50,6 +50,11 @@
     <Compile Include="Database\Attributes\DBMSNotNull.cs" />
     <Compile Include="Database\Attributes\DBMSPrimayKey.cs" />
     <Compile Include="Database\Attributes\DBMSUnique.cs" />
+    <Compile Include="Database\Columns\CollectionColumn.cs" />
+    <Compile Include="Database\Columns\DataColumn.cs" />
+    <Compile Include="Database\Columns\FieldToColumn.cs" />
+    <Compile Include="Database\Columns\ForeignKeyColumn.cs" />
+    <Compile Include="Database\Columns\PrimaryKeyColumn.cs" />
     <Compile Include="Database\Connector.cs" />
     <Compile Include="Database\Attributes\DBMSIgnore.cs" />
     <Compile Include="Database\DatabaseManager.cs" />
@@ -57,6 +62,7 @@
     <Compile Include="Database\DataTable.cs" />
     <Compile Include="Database\DBMS.cs" />
     <Compile Include="Database\ForeignKey.cs" />
+    <Compile Include="Database\LinkTableColumn.cs" />
     <Compile Include="Database\MySqlConnector.cs" />
     <Compile Include="Database\TableColumn.cs" />
     <Compile Include="Domain\Account.cs" />

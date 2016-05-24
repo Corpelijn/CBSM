@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Text;
 using MySql.Data.MySqlClient;
 using System.Data.Common;
+using CBSM.Database.Columns;
 
 namespace CBSM.Database
 {
@@ -98,12 +99,12 @@ namespace CBSM.Database
 
             command.Prepare();
             DbDataReader reader = command.ExecuteReader(System.Data.CommandBehavior.KeyInfo);
-            command.Dispose(); 
+            command.Dispose();
 
             DataTable dt = new DataTable(reader);
             reader.Close();
             reader.Dispose();
-            
+
             command.Dispose();
 
             return dt;
@@ -146,47 +147,51 @@ namespace CBSM.Database
             return true;
         }
 
-        public override bool CreateTable(string name, List<TableColumn> columns)
+        public override bool CreateTable(string name, List<FieldToColumn> columns)
         {
             StringBuilder sb = new StringBuilder();
 
             sb.Append("create table ").Append(name).Append(" (\n");
-            foreach (TableColumn c in columns)
+            foreach (FieldToColumn c in columns)
             {
-                sb.Append(c.Name).Append("\t");
+                sb.Append(c.ColumnName).Append("\t");
 
-                if (c.Type == typeof(string))
+                if (c.ColumnType == typeof(string))
                     sb.Append("varchar(1)");
-                else if (c.Type == typeof(int) || c.Type == typeof(short))
+                else if (c.ColumnType == typeof(int) || c.ColumnType == typeof(short))
                     sb.Append("integer(11)");
-                else if (c.Type == typeof(long))
+                else if (c.ColumnType == typeof(long))
                     sb.Append("bigint");
-                else if (c.Type == typeof(DateTime))
+                else if (c.ColumnType == typeof(DateTime))
                     sb.Append("datetime");
-                else if (c.Type == typeof(double) || c.Type == typeof(float))
+                else if (c.ColumnType == typeof(double) || c.ColumnType == typeof(float))
                     sb.Append("decimal(9,2)");
-                else if (c.Type == typeof(bool))
+                else if (c.ColumnType == typeof(bool))
                     sb.Append("integer(11)");
                 else
                     sb.Append("blob");
 
-                if (c.PrimaryKey)
+                if (c.GetType() == typeof(PrimaryKeyColumn))
                     sb.Append("\tauto_increment primary key");
                 else
                 {
-                    if (c.ForeignKey != null)
-                        c.ForeignKey.WriteToDatabase();
+                    if (c.GetType().IsSubclassOf(typeof(ForeignKeyColumn)))
+                        ((ForeignKeyColumn)c).ForeignKey.WriteToDatabase();
 
-                    if (c.Nullable)
-                        sb.Append("\tnull");
-                    else
-                        sb.Append("\tnot null");
+                    if (c.GetType().IsSubclassOf(typeof(DataColumn)))
+                    {
+                        DataColumn col = (DataColumn)c;
+                        if (col.Nullable)
+                            sb.Append("\tnull");
+                        else
+                            sb.Append("\tnot null");
 
-                    if (c.Unique)
-                        sb.Append("\tunique");
+                        if (col.Unique)
+                            sb.Append("\tunique");
 
-                    if (c.DefaultValue != null)
-                        sb.Append("\tdefault ").Append(c.DefaultValue);
+                        if (col.DefaultValue != null)
+                            sb.Append("\tdefault ").Append(col.DefaultValue);
+                    }
                 }
 
                 sb.Append(",\n");

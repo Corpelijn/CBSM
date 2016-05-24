@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CBSM.Database.Columns;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -62,7 +63,7 @@ namespace CBSM.Database
             GetInstance().GetCurrentConnection().CheckOrAlterColumn(table, column, type, length);
         }
 
-        public static void CreateTable(string name, List<TableColumn> columns)
+        public static void CreateTable(string name, List<FieldToColumn> columns)
         {
             GetInstance().GetCurrentConnection().CreateTable(name, columns);
         }

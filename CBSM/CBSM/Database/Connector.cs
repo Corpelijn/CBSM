@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CBSM.Database.Columns;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -60,6 +61,6 @@ namespace CBSM.Database
 
         public abstract bool CheckOrAlterColumn(string table, string column, Type type, int length);
 
-        public abstract bool CreateTable(string name, List<TableColumn> columns);
+        public abstract bool CreateTable(string name, List<FieldToColumn> columns);
     }
 }
