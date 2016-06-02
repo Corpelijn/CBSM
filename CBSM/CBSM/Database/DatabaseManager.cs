@@ -76,7 +76,7 @@ namespace CBSM.Database
 
         public static __ForeignKey[] GetForeignKeys(string table)
         {
-            return __ForeignKey.GetFromDatabase("sourcetable=?", table);
+            return __ForeignKey.GetFromDatabase("sourcetable=? or (sourcecolumn like ? and sourcetable like ?)", table, table + "%", "__link_%");
         }
 
         public static object GetObjectFromForeignKey(__ForeignKey fk, int id)

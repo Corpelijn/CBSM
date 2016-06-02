@@ -154,6 +154,13 @@ namespace CBSM.Database
             sb.Append("create table ").Append(name).Append(" (\n");
             foreach (FieldToColumn c in columns)
             {
+                if (c.GetType() == typeof(CollectionColumn))
+                {
+                    CollectionColumn col = (CollectionColumn)c;
+                    CreateTable(col.ColumnName, col.Columns);
+                    continue;
+                }
+
                 sb.Append(c.ColumnName).Append("\t");
 
                 if (c.ColumnType == typeof(string))
@@ -175,10 +182,10 @@ namespace CBSM.Database
                     sb.Append("\tauto_increment primary key");
                 else
                 {
-                    if (c.GetType().IsSubclassOf(typeof(ForeignKeyColumn)))
+                    if (c.GetType() == typeof(ForeignKeyColumn))
                         ((ForeignKeyColumn)c).ForeignKey.WriteToDatabase();
 
-                    if (c.GetType().IsSubclassOf(typeof(DataColumn)))
+                    if (c.GetType() == typeof(DataColumn))
                     {
                         DataColumn col = (DataColumn)c;
                         if (col.Nullable)

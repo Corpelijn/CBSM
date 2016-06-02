@@ -9,14 +9,12 @@ namespace CBSM.Domain
     {
         private int number;
         private string description;
-        private Serie serie;
         //private List<Episode> episodes;
 
-        public Season(int number, string description, Serie serie)
+        public Season(int number, string description)
         {
             this.number = number;
             this.description = description;
-            this.serie = serie;
         }
 
         public Season()

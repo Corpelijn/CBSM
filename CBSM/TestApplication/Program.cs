@@ -12,12 +12,13 @@ namespace TestApplication
         {
             DatabaseManager.AddConnection("localhost", "bmt", "root", "");
 
-            //Season[] s = Season.GetAllFromDatabase();
+            Serie[] s = Serie.GetAllFromDatabase();
 
-            Serie s = new Serie("Frank and Dale", "F&D");
+            //Serie s = new Serie("Frank and Dale", "F&D");
+            //Season s1 = new Season(1, "Police and criminal");
+
+            //s.AddSeason(s1);
             //s.WriteToDatabase();
-            Season s1 = new Season(1, "Police and criminal", s);
-            s1.WriteToDatabase();
 
             Console.WriteLine();
             Console.WriteLine("All done . . .");

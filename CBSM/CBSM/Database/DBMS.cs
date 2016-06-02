@@ -24,7 +24,7 @@ namespace CBSM.Database
         public void WriteToDatabase()
         {
             // Check if the table exist
-            if(!DatabaseManager.DoesTableExist(this.GetType().Name))
+            if (!DatabaseManager.DoesTableExist(this.GetType().Name))
                 CreateTable();
 
             // Check if the table has the correct columns
@@ -45,22 +45,36 @@ namespace CBSM.Database
                 {
                     FieldToColumn col = new DataColumn(field.Name, field.FieldType);
                     //TableColumn tc = new TableColumn(field.Name, field.FieldType);
-                    
-                    //// Check for a collection
-                    //if (field.FieldType.GetInterface("ICollection") != null)
-                    //{
-                    //    ICollection c = (ICollection)field.GetValue(this);
-                    //    if (c.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(DBMS)))
-                    //    {
-                    //        Console.WriteLine("linktable met vage klassen");
-                    //    }
-                    //    else
-                    //    {
 
-                    //    }
-                    //}
-                    //else
-                    //{
+                    // Check for a collection
+                    if (field.FieldType.GetInterface("ICollection") != null)
+                    {
+                        ICollection c = (ICollection)field.GetValue(this);
+                        if (c.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(DBMS)))
+                        {
+                            Console.WriteLine("linktable met vage klassen");
+                        }
+                        else
+                        {
+                            string tablename = "__link_" + this.GetType().Name + "_" + field.Name + "_" + c.GetType().GenericTypeArguments[0].Name;
+                            CollectionColumn ccol = new CollectionColumn(tablename);
+                            ccol.AddColumn(new PrimaryKeyColumn("id", typeof(int)));
+                            ccol.AddColumn(new ForeignKeyColumn(new __ForeignKey(tablename, this.GetType().Name + "_id", this.GetType().FullName)));
+                            ccol.AddColumn(new ForeignKeyColumn(new __ForeignKey(tablename, c.GetType().GenericTypeArguments[0].Name + "_id", c.GetType().GenericTypeArguments[0].FullName)));
+
+                            if (!DatabaseManager.DoesTableExist(c.GetType().GenericTypeArguments[0].Name))
+                            {
+                                CollectionColumn typecol = new CollectionColumn(c.GetType().GenericTypeArguments[0].Name);
+                                typecol.AddColumn(new PrimaryKeyColumn("id", typeof(int)));
+                                typecol.AddColumn(new DataColumn("value", c.GetType().GenericTypeArguments[0]));
+                                ccol.AddColumn(typecol);
+                            }
+
+                            col = ccol;
+                        }
+                    }
+                    else
+                    {
                         if (field.FieldType.IsSubclassOf(typeof(DBMS)))
                         {
                             col = new ForeignKeyColumn(new __ForeignKey(this.GetType().Name, field.Name, field.FieldType.FullName));
@@ -81,7 +95,7 @@ namespace CBSM.Database
 
                         if (field.GetCustomAttributes(typeof(DBMSNotNull), false).Length > 0)
                             ((DataColumn)col).Nullable = false;
-                    //}
+                    }
 
                     columns.Add(col);
                 }
@@ -128,10 +142,12 @@ namespace CBSM.Database
             foreach (FieldToColumn column in columns)
             {
                 int length = 0;
+                if (column.GetType() == typeof(CollectionColumn))
+                    continue;
                 if (column.ColumnType == typeof(string))
                 {
                     Type baseClass = this.GetType();
-                    FieldInfo field =null;
+                    FieldInfo field = null;
                     while (baseClass != typeof(object))
                     {
                         field = baseClass.GetField(column.ColumnName, BindingFlags.Instance | BindingFlags.NonPublic);
@@ -152,20 +168,58 @@ namespace CBSM.Database
             DatabaseManager.CreateTable(this.GetType().Name, columns);
         }
 
+        private int CheckIfValueExists(object value)
+        {
+            DataTable dt = DatabaseManager.ExecuteQuery("select id from " + value.GetType().Name + " where value=?", value);
+            if (dt.GetRowCount() == 0)
+                return -1;
+            else
+                return Convert.ToInt32(dt.GetValueFromRow(0, "id"));
+        }
+
         private void InsertRecord()
         {
             List<object> data = new List<object>();
             StringBuilder query = new StringBuilder();
 
+            Dictionary<int, string> foreignkeyid = new Dictionary<int, string>();
+
             query.Append("insert into ").Append(this.GetType().Name).Append(" (");
             foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey), typeof(DBMSIgnore) }))
             {
+                if (fi.FieldType.GetInterface("ICollection") != null)
+                {
+                    ICollection c = (ICollection)fi.GetValue(this);
+                    if (c.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(DBMS)))
+                    {
+                        Console.WriteLine("linktable met vage klassen");
+                    }
+                    else
+                    {
+                        string tablename = "__link_" + this.GetType().Name + "_" + fi.Name + "_" + c.GetType().GenericTypeArguments[0].Name;
+                        //tablename = c.GetType().GenericTypeArguments[0].Name;
+                        foreach (var item in c)
+                        {
+                            int itemid = -1;
+                            if ((itemid = CheckIfValueExists(item)) == -1)
+                            {
+                                DatabaseManager.ExecuteNonQuery("insert into " + item.GetType().Name + "(value) values (?)", item);
+                                DataTable linkdt = DatabaseManager.ExecuteQuery("select max(id) as id from " + item.GetType().Name);
+                                itemid =Convert.ToInt32(linkdt.GetValueFromRow(0, "id"));
+                            }
+                            foreignkeyid.Add(itemid, tablename);
+                        }
+                    }
+                    continue;
+                }
+
                 query.Append(fi.Name).Append(",");
                 if (fi.GetValue(this).GetType().IsSubclassOf(typeof(DBMS)))
                 {
                     DBMS obj = (DBMS)fi.GetValue(this);
                     data.Add(obj.GetIdForForeignKey());
                 }
+
                 else
                 {
                     data.Add(fi.GetValue(this));
@@ -185,6 +239,14 @@ namespace CBSM.Database
 
             DataTable dt = DatabaseManager.ExecuteQuery("select max(id) as id from " + this.GetType().Name);
             this.id = int.Parse(dt.GetValueFromRow(0, "id").ToString());
+
+
+            // Set the foreign key values
+            foreach (KeyValuePair<int, string> kvp in foreignkeyid)
+            {
+                string colname = kvp.Value.Substring(kvp.Value.LastIndexOf('_') + 1);
+                DatabaseManager.ExecuteNonQuery("insert into " + kvp.Value + " (" + this.GetType().Name + "_id, " + colname + "_id) values (?,?)", this.id, kvp.Key);
+            }
         }
 
         private void UpdateRecord()
@@ -195,6 +257,33 @@ namespace CBSM.Database
             query.Append("update ").Append(this.GetType().Name).Append(" set ");
             foreach (FieldInfo fi in GetColumnsAsFields(new Type[] { typeof(DBMSPrimayKey), typeof(DBMSIgnore) }))
             {
+                if (fi.FieldType.GetInterface("ICollection") != null)
+                {
+                    ICollection c = (ICollection)fi.GetValue(this);
+                    if (c.GetType().GenericTypeArguments[0].IsSubclassOf(typeof(DBMS)))
+                    {
+                        Console.WriteLine("linktable met vage klassen");
+                    }
+                    else
+                    {
+                        string tablename = "__link_" + this.GetType().Name + "_" + fi.Name + "_" + c.GetType().GenericTypeArguments[0].Name;
+                        //tablename = c.GetType().GenericTypeArguments[0].Name;
+                        foreach (var item in c)
+                        {
+#warning Lijst bijwerken
+                            int itemid = -1;
+                            if ((itemid = CheckIfValueExists(item)) == -1)
+                            {
+                                DatabaseManager.ExecuteNonQuery("insert into " + item.GetType().Name + "(value) values (?)", item);
+                                DataTable linkdt = DatabaseManager.ExecuteQuery("select max(id) as id from " + item.GetType().Name);
+                                itemid = Convert.ToInt32(linkdt.GetValueFromRow(0, "id"));
+                            }
+                            foreignkeyid.Add(itemid, tablename);
+                        }
+                    }
+                    continue;
+                }
+
                 query.Append(fi.Name).Append("=?,");
                 if (fi.GetValue(this).GetType().IsSubclassOf(typeof(DBMS)))
                 {
@@ -250,6 +339,13 @@ namespace CBSM.Database
             }
             return id;
         }
+
+        private static int linktable = 0;
+        private static int NextLinkTableId()
+        {
+            linktable++;
+            return linktable;
+        }
     }
 
     public class DBMS<T> : DBMS where T : new()
@@ -294,7 +390,7 @@ namespace CBSM.Database
 
             if (mi != null)
             {
-                List<FieldInfo> fields = (List<FieldInfo>)mi.Invoke(instance, new object[] {new Type[] {}});
+                List<FieldInfo> fields = (List<FieldInfo>)mi.Invoke(instance, new object[] { new Type[] { } });
                 List<__ForeignKey> fk = new List<__ForeignKey>(DatabaseManager.GetForeignKeys(instance.GetType().Name));
 
                 DataTable dt = DatabaseManager.ExecuteQuery("select * from " + instance.GetType().Name + " where id=?", id);
@@ -307,6 +403,32 @@ namespace CBSM.Database
                     }
                     else
                     {
+                        if (fi.FieldType.GetInterface("ICollection") != null)
+                        {
+                            Type collectiontype =fi.FieldType.GenericTypeArguments[0];
+                            if (collectiontype.IsSubclassOf(typeof(DBMS)))
+                            {
+                                Console.WriteLine("linktable met vage klassen");
+                            }
+                            else
+                            {
+                                string table = "__link_" + instance.GetType().Name + "_" + fi.Name + "_" + collectiontype.Name;
+                                var listType = typeof(List<>);
+                                var constructedListType = listType.MakeGenericType(collectiontype);
+
+                                IList c = (IList)Activator.CreateInstance(constructedListType);
+                                DataTable collectiondata = DatabaseManager.ExecuteQuery("select " + collectiontype.Name + "_id as id from " + table + " where " + instance.GetType().Name + "_id=?", id);
+                                foreach (DataRow row in collectiondata)
+                                {
+                                    DataTable collectionvalue = DatabaseManager.ExecuteQuery("select value from " + collectiontype.Name + " where id=?", row.GetData("id"));
+                                    c.Add(collectionvalue.GetValueFromRow(0, "value"));
+                                }
+
+                                fi.SetValue(instance, c);
+                                continue;
+                            }
+                        }
+
                         fi.SetValue(instance, dt.GetValueFromRow(0, fi.Name));
                     }
                 }
