@@ -15,6 +15,7 @@ namespace CBSM.Database
 
         private DatabaseManager()
         {
+            
             dbConnections = new List<Connector>();
             this.activeConnection = -1;
         }

@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CBSM", "CBSM\CBSM.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{A492E0C8-ACDD-472A-B4D7-F3727CBF5E6E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CBSM Web", "CBSM Web\CBSM Web.csproj", "{CEE973D5-3804-40BF-89DC-F3E48DA3FFFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{A492E0C8-ACDD-472A-B4D7-F3727CBF5E6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A492E0C8-ACDD-472A-B4D7-F3727CBF5E6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A492E0C8-ACDD-472A-B4D7-F3727CBF5E6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE973D5-3804-40BF-89DC-F3E48DA3FFFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE973D5-3804-40BF-89DC-F3E48DA3FFFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE973D5-3804-40BF-89DC-F3E48DA3FFFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE973D5-3804-40BF-89DC-F3E48DA3FFFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

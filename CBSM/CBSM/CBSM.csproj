@@ -37,6 +37,7 @@
       <HintPath>..\..\..\..\TFS\School\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -62,8 +63,11 @@
     <Compile Include="Database\DataTable.cs" />
     <Compile Include="Database\DBMS.cs" />
     <Compile Include="Database\ForeignKey.cs" />
+    <Compile Include="Database\ForeignKeyTableContentGenerator.cs" />
+    <Compile Include="Database\KnownObject.cs" />
     <Compile Include="Database\LinkTableColumn.cs" />
     <Compile Include="Database\MySqlConnector.cs" />
+    <Compile Include="Database\ObjectManager.cs" />
     <Compile Include="Database\TableColumn.cs" />
     <Compile Include="Domain\Account.cs" />
     <Compile Include="Domain\Object\BaseClass.cs" />
@@ -77,7 +81,9 @@
     <Compile Include="Domain\Serie.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="ClassDiagram.cd" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
