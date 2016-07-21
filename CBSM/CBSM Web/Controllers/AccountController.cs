@@ -13,7 +13,7 @@ namespace CBSM_Web.Controllers
     {
         public ActionResult Index()
         {
-            DatabaseManager.AddConnection("localhost", "bmt", "root", "");
+            DatabaseManager.AddConnection("82.196.10.160", "cbsm", "root", "M4khMNL&D");
             //Account test = new Account("test", "test", null);
             //test.WriteToDatabase();
 

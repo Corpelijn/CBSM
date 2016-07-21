@@ -10,7 +10,7 @@ namespace TestApplication
     {
         static void Main(string[] args)
         {
-            DatabaseManager.AddConnection("localhost", "bmt", "root", "");
+            DatabaseManager.AddConnection("82.196.10.160", "cbsm", "root", "M4khMNL&D");
 
             //Serie[] s = Serie.GetAllFromDatabase();
             //Account.GetAllFromDatabase();
@@ -23,6 +23,8 @@ namespace TestApplication
             //s.AddSeason(s2);
             //s.WriteToDatabase();
             //s1.WriteToDatabase();
+
+            new Account("admin", "admin", null).WriteToDatabase();
 
             Console.WriteLine();
             Console.WriteLine("All done . . .");
