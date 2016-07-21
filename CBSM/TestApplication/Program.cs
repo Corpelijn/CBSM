@@ -12,7 +12,8 @@ namespace TestApplication
         {
             DatabaseManager.AddConnection("localhost", "bmt", "root", "");
 
-            Serie[] s = Serie.GetAllFromDatabase();
+            //Serie[] s = Serie.GetAllFromDatabase();
+            //Account.GetAllFromDatabase();
 
             //Serie s = new Serie("Frank and Dale", "F&D");
             //Season s1 = new Season(1, "Police and criminal", s);

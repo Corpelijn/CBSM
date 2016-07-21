@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Details";
+
+    bool usernameerror = TempData.ContainsKey("usernameerror");
+    bool passworderror = TempData.ContainsKey("passworderror");
+    bool confirmerror = TempData.ContainsKey("confirmerror");
+
+    bool username = TempData.ContainsKey("username");
+    bool password = TempData.ContainsKey("password");
+    bool confirm = TempData.ContainsKey("confirm");
+
+    bool hidepassword = TempData.ContainsKey("hidepassword");
+    bool updateaccount = TempData.ContainsKey("updateaccount");
+    bool resetpassword = TempData.ContainsKey("resetpassword");
+}
+
+<script>
+    $(document).ready(function () {
+        $('.input-object').focusin(function () {
+            $('#' + $(this).attr('id') + '-help').removeClass('hidden');
+        });
+        $('.input-object').focusout(function () {
+            $('#' + $(this).attr('id') + '-help').addClass('hidden');
+        });
+
+        $('#username').keyup(function () {
+            Username();
+        });
+        $('#password').keyup(function () {
+            Password();
+        });
+        $('#confirm').keyup(function () {
+            ConfirmPassword();
+        });
+
+        $('#btn-cancel').click(function () {
+            window.location.assign('/Settings/Access');
+        });
+
+
+        function Username() {
+            if ($('#username').val() != '') {
+                $.post(
+                    '/Account/CheckUsername?username=' + $('#username').val() + '&unique=' + '@(updateaccount ? TempData["updateaccount"] : "")',
+                    function (data) {
+                        var values = jQuery.parseJSON(JSON.stringify(data));
+                        if (values.unique) {
+                            $('#usernameunique').removeClass('hidden');
+                            $('#usernameused').addClass('hidden');
+                        } else {
+                            $('#usernameunique').addClass('hidden');
+                            $('#usernameused').removeClass('hidden');
+                        }
+                    });
+            } else {
+                $('#usernameunique').addClass('hidden');
+                $('#usernameused').addClass('hidden');
+            }
+        }
+
+        function Password() {
+            if ($('#password').val() != '') {
+                $.post(
+                    '/Account/CheckPasswordComplexity?password=' + encodeURIComponent($('#password').val()),
+                    function (data) {
+                        var values = jQuery.parseJSON(JSON.stringify(data));
+
+                        if (values.length) {
+                            $('#pwd-long').css('color', 'green');
+                        } else {
+                            $('#pwd-long').css('color', 'red');
+                        }
+
+                        if (values.lower) {
+                            $('#pwd-lower').css('color', 'green');
+                        } else {
+                            $('#pwd-lower').css('color', 'red');
+                        }
+
+                        if (values.upper) {
+                            $('#pwd-upper').css('color', 'green');
+                        } else {
+                            $('#pwd-upper').css('color', 'red');
+                        }
+
+                        if (values.numeric) {
+                            $('#pwd-num').css('color', 'green');
+                        } else {
+                            $('#pwd-num').css('color', 'red');
+                        }
+                    });
+            } else {
+                $('#pwd-long').css('color', 'red');
+                $('#pwd-upper').css('color', 'red');
+                $('#pwd-lower').css('color', 'red');
+                $('#pwd-num').css('color', 'red');
+            }
+        }
+
+        function ConfirmPassword() {
+            if ($('#password').val() == $('#confirm').val()) {
+                $('#confirm-yes').removeClass('hidden');
+                $('#confirm-no').addClass('hidden');
+            } else {
+                $('#confirm-no').removeClass('hidden');
+                $('#confirm-yes').addClass('hidden');
+            }
+        }
+
+        Username();
+        Password();
+        ConfirmPassword();
+    });
+
+</script>
+
+<div class="row">
+    <div class="col-md-6">
+        <h1>Account details</h1>
+
+        @using (Html.BeginForm(TempData["post"].ToString(), "Account"))
+        {
+            <input type="hidden" name="account_id" value="@(TempData.ContainsKey("account_id") ? TempData["account_id"] : "")" />
+            if (!resetpassword)
+            {
+            <div class="form-group @(usernameerror ? "has-error" : "")">
+                <label class="control-label">Username</label><br />
+                <small class="@(usernameerror ? "" : "hidden")" style="color:red">@(usernameerror ? TempData["usernameerror"] : "")</small>
+                <input class="form-control input-object" type="text" placeholder="Username" name="username" id="username" value="@(username ? TempData["username"] : "")" autofocus />
+
+                <div class="" id="username-help">
+                    <br />
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <small>Choose an username for the new account you want to create. The username must be unique<br />
+                                <span class="hidden" id="usernameunique" style="color: green">Username is unique</span>
+                                <span class="hidden" id="usernameused" style="color: red">Username is not unique</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+
+            if (!hidepassword || resetpassword)
+            {
+            <div class="form-group @(passworderror ? "has-error" : "")" id="password-group">
+                <label class="control-label">Password</label><br />
+                <small class="@(passworderror ? "" : "hidden")" style="color:red">@(passworderror ? TempData["passworderror"] : "")</small>
+                <input class="form-control input-object" type="password" placeholder="Password" name="password" value="@(password ? TempData["password"] : "")" id="password" />
+
+                <div class="hidden" id="password-help">
+                    <br />
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <small>Choose a password for the new account you want to create. The password must meet the following requirements:
+                                        <br />
+                                <ul>
+                                    <li><span id="pwd-long" style="color: red">Must be at least 8 characters long</span></li>
+                                    <li><span id="pwd-lower" style="color: red">Must contain a lower-case character</span></li>
+                                    <li><span id="pwd-upper" style="color: red">Must contain a upper-case character</span></li>
+                                    <li><span id="pwd-num" style="color: red">Must contain a numeric character</span></li>
+                                </ul>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="form-group @(confirmerror ? "has-error" : "")" id="confirm-group">
+                <label class="control-label">Confirm password</label><br />
+                <small class="@(confirmerror ? "" : "hidden")" style="color:red">@(confirmerror ? TempData["confirmerror"] : "")</small>
+                <input class="form-control input-object" type="password" placeholder="Confirm password" name="confirm" value="@(confirm ? TempData["confirm"] : "")" id="confirm" />
+
+                <div class="hidden" id="confirm-help">
+                    <br />
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <small>Confirm the password you typed in the box above.<br />
+                                <span class="hidden" id="confirm-no" style="color: red">The content of the password boxes does not match</span>
+                                <span class="hidden" id="confirm-yes" style="color: green">The content of the password boxes matches</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+            
+            <button type="submit" class="btn btn-success">@TempData["savebutton"]</button>
+            <button type="button" class="btn btn-danger" id="btn-cancel">Cancel</button>
+        }
+    </div>
+</div>
+
+

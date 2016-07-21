@@ -277,10 +277,13 @@ namespace CBSM.Database
                 }
 
                 query.Append(fi.Name).Append(",");
-                if (fi.GetValue(this).GetType().IsSubclassOf(typeof(DBMS)))
+                if (fi.FieldType.IsSubclassOf(typeof(DBMS)))
                 {
                     DBMS obj = (DBMS)fi.GetValue(this);
-                    data.Add(obj.GetIdForForeignKey());
+                    if (obj == null)
+                        data.Add(null);
+                    else
+                        data.Add(obj.GetIdForForeignKey());
                 }
 
                 else
@@ -422,11 +425,21 @@ namespace CBSM.Database
             return id;
         }
 
+        public void RemoveFromDatabase()
+        {
+            DatabaseManager.ExecuteNonQuery("delete from " + this.GetType().Name + " where id=?", this.id);
+        }
+
         private static int linktable = 0;
         private static int NextLinkTableId()
         {
             linktable++;
             return linktable;
+        }
+
+        public int Id
+        {
+            get { return id; }
         }
     }
 
@@ -434,6 +447,9 @@ namespace CBSM.Database
     {
         public static T[] GetAllFromDatabase()
         {
+            if (!DatabaseManager.DoesTableExist(typeof(T).Name))
+                return new T[] { };
+                
             DataTable dt = DatabaseManager.ExecuteQuery("select id from " + typeof(T).Name);
 
             List<T> data = new List<T>();
@@ -447,6 +463,9 @@ namespace CBSM.Database
 
         public static T[] GetFromDatabase(string whereclause, params object[] parameters)
         {
+            if (!DatabaseManager.DoesTableExist(typeof(T).Name))
+                return new T[] { };
+
             DataTable dt = DatabaseManager.ExecuteQuery("select id from " + typeof(T).Name + " where " + whereclause, parameters);
 
             List<T> data = new List<T>();
@@ -458,8 +477,20 @@ namespace CBSM.Database
             return data.ToArray();
         }
 
+        public static int GetRecordCountFromDatabase()
+        {
+            if (!DatabaseManager.DoesTableExist(typeof(T).Name))
+                return 0;
+
+            DataTable dt = DatabaseManager.ExecuteQuery("select count(*) as count from " + typeof(T).Name);
+            return int.Parse(dt.GetValueFromRow(0, "count").ToString());
+        }
+
         public static T GetFromDatabaseById(int id)
         {
+            if (!DatabaseManager.DoesTableExist(typeof(T).Name))
+                return default(T);
+
             T instance = new T();
             ObjectManager.AddObject(id, instance.GetType(), instance);
             Type currentType = instance.GetType();
@@ -482,7 +513,9 @@ namespace CBSM.Database
                     __ForeignKey foreignKey = fk.Find(f => f.Column == fi.Name);
                     if (foreignKey != null)
                     {
-                        fi.SetValue(instance, DatabaseManager.GetObjectFromForeignKey(foreignKey, int.Parse(dt.GetValueFromRow(0, fi.Name).ToString())));
+                        string temp = dt.GetValueFromRow(0, fi.Name).ToString();
+                        if(dt.GetValueFromRow(0, fi.Name).ToString() != "")
+                            fi.SetValue(instance, DatabaseManager.GetObjectFromForeignKey(foreignKey, int.Parse(dt.GetValueFromRow(0, fi.Name).ToString())));
                     }
                     else
                     {

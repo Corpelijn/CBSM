@@ -36,6 +36,7 @@ namespace CBSM.Database
                     // Object is outdated
                     knownObjects.RemoveAt(i);
                     i--;
+                    continue;
                 }
                 if (knownObjects[i].Id == id && knownObjects[i].Table == table)
                 {

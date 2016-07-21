@@ -1,0 +1,136 @@
+﻿@{
+    ViewBag.Title = "Access";
+
+    TempData.Remove("hidepassword");
+}
+
+<script>
+    $(document).ready(function () {
+        $('#table-account').DataTable({
+            "order": [[0, "asc"]],
+            "retrieve": true,
+            "pageLength": 10
+        });
+    });
+</script>
+
+<div class="row">
+    <div class="col-md-12">
+        <h1>Access settings</h1>
+
+        <p>
+            With the settings on this page changes can be made in the access rights accounts have to the pages.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Accounts
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <a href="~/Account/Add" class="btn btn-success btn-block btn-lg">Add account</a>
+                        <br />
+
+                        @if (TempData.ContainsKey("erroraccount"))
+                        {
+                            <span style="color: red">@TempData["erroraccount"]</span><br />
+                        }
+
+                        <br />
+
+                        <table class="table table-hover" id="table-account">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Salt</th>
+                                    <th width="7%">Reset</th>
+                                    <th width="10%">Edit/Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (CBSM.Domain.Account account in CBSM.Domain.Account.GetAllFromDatabase())
+                                {
+                                    <tr>
+                                        <td>@account.Username</td>
+                                        <td>@account.Salt</td>
+                                        <td>
+                                            @if (account.Username != Session["accountusername"].ToString())
+                                            {
+                                                using(Html.BeginForm("ResetPassword", "Account"))
+                                                {
+                                                    <input type="hidden" name="account_id" value="@account.Id" />
+                                                    <button type="submit" class="btn btn-xs btn-success">Reset password</button>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @using (Html.BeginForm("Edit", "Account"))
+                                            {
+                                                <input type="hidden" name="account_id" value="@account.Id" />
+                                                <button type="submit" class="btn btn-xs btn-primary col-md-6">Edit</button>
+                                            }
+                                            @using (Html.BeginForm("Delete", "Account"))
+                                            {
+                                                <input type="hidden" name="account_id" value="@account.Id" />
+                                                <button type="submit" class="btn btn-xs btn-danger col-md-6">Delete</button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Rights
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <button class="btn btn-success btn-block btn-lg">Add right</button>
+                        <br />
+                        <br />
+                        <table class="table table-hover" id="table-account">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th width="10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (CBSM.Domain.Account account in CBSM.Domain.Account.GetAllFromDatabase())
+                                {
+                                    <tr>
+                                        <td>@account.Username</td>
+                                        <td>@account.Salt</td>
+                                        <td>
+                                            <button class="btn btn-xs btn-primary col-md-6">Edit</button>
+                                            <button class="btn btn-xs btn-danger col-md-6">Delete</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

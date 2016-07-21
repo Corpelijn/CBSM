@@ -42,11 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actor.cs" />
-    <Compile Include="ApplicationIdeabox.cs" />
-    <Compile Include="Attribute.cs" />
-    <Compile Include="Character.cs" />
-    <Compile Include="Cloth.cs" />
     <Compile Include="Database\Attributes\DBMSDefaultValue.cs" />
     <Compile Include="Database\Attributes\DBMSNotNull.cs" />
     <Compile Include="Database\Attributes\DBMSPrimayKey.cs" />
@@ -71,18 +66,15 @@
     <Compile Include="Database\TableColumn.cs" />
     <Compile Include="Domain\Account.cs" />
     <Compile Include="Domain\Object\BaseClass.cs" />
-    <Compile Include="Episode.cs" />
-    <Compile Include="Idea.cs" />
-    <Compile Include="Ideabox.cs" />
-    <Compile Include="InternetIdeabox.cs" />
+    <Compile Include="Domain\Person.cs" />
+    <Compile Include="Domain\Right.cs" />
+    <Compile Include="Domain\RightGroup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scene.cs" />
     <Compile Include="Domain\Seizoen.cs" />
     <Compile Include="Domain\Serie.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="ClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

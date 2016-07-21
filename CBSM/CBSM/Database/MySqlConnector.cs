@@ -61,7 +61,9 @@ namespace CBSM.Database
             parameter.ParameterName = "@" + index;
             parameter.Value = data;
 
-            if (data.GetType() == typeof(string))
+            if (data == null)
+                parameter.DbType = System.Data.DbType.Object;
+            else if (data.GetType() == typeof(string))
                 parameter.DbType = System.Data.DbType.String;
             else if (data.GetType() == typeof(int) || data.GetType() == typeof(short))
                 parameter.DbType = System.Data.DbType.Int32;

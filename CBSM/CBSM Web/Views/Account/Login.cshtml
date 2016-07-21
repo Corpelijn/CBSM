@@ -1,0 +1,68 @@
+﻿@{
+    ViewBag.Title = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>@CBSM_Web.Domain.ApplicationInformation.GetPageTitle()</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link href="@Url.Content("~/bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet" type="text/css" />
+
+    <!-- jQuery -->
+    @Scripts.Render("~/bundles/jquery")
+    <script src="@Url.Content("~/bower_components/jquery/dist/jquery.min.js")"></script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2" style="margin-top:10%">
+                <center>
+                <h4>In order to gain access to the CoBa Series Manager a login is required.<br />Please login below to continue.</h4>
+                    </center>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default" style="margin-top:30px">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Please login</h3>
+                    </div>
+                    <div class="panel-body">
+                        @if (ViewData.ContainsKey("errormessage"))
+                        {
+                            <label style="color:maroon">@ViewData["errormessage"]</label>
+                        }
+                        @using (Html.BeginForm("Validate", "Account"))
+                        {
+                            <fieldset>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Username" name="username" type="text" autofocus>
+                                </div>
+                                <div class="form-group">
+                                    <input class="form-control" placeholder="Password" name="password" type="password" value="">
+                                </div>
+                                <button type="submit" class="btn btn-success btn-lg btn-block">Login</button>
+                            </fieldset>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Custom Theme JavaScript -->
+    <script src="@Url.Content("~/Scripts/sb-admin-2.js")"></script>
+</body>
+</html>
+
