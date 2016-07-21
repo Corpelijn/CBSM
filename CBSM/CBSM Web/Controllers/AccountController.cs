@@ -87,6 +87,7 @@ namespace CBSM_Web.Controllers
         public ActionResult Add()
         {
             TempData["savebutton"] = "Create account";
+            TempData["post"] = "CreateAccount";
             return View("Details");
         }
 
