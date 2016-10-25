@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="~/components/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="~/components/jvectormap/jquery-jvectormap-1.2.2.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/components/adminlte/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="~/components/adminlte/css/skins/_all-skins.min.css">
+
+
+
+    <!-- iCheck -->
+    <link rel="stylesheet" href="~/components/iCheck/flat/blue.css">
+    <!-- Morris chart -->
+    <link rel="stylesheet" href="~/components/morris/morris.css">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="~/components/jvectormap/jquery-jvectormap-1.2.2.css">
+    <!-- Date Picker -->
+    <link rel="stylesheet" href="~/components/datepicker/datepicker3.css">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="~/components/daterangepicker/daterangepicker.css">
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link rel="stylesheet" href="~/components/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+</head>
+<body class="hold-transition skin-blue layout-top-nav">
+        <div class="wrapper">
+        @Html.Action("_MainHeaderEmpty", "_Shared")
+
+        <!-- Full Width Column -->
+        <div class="content-wrapper">
+            <div class="container">
+                <!-- Content Header (Page header) -->
+                <section class="content-header">
+                    <h1>Top Navigation
+         
+                        <small>Example 2.0</small>
+                    </h1>
+                    <ol class="breadcrumb">
+                        <li><a href="#"><i class="fa fa-dashboard"></i>Home</a></li>
+                        <li><a href="#">Layout</a></li>
+                        <li class="active">Top Navigation</li>
+                    </ol>
+                </section>
+
+                <!-- Main content -->
+                @RenderBody()
+                <!-- /.content -->
+            </div>
+            <!-- /.container -->
+        </div>
+        <!-- /.content-wrapper -->    
+
+        @Html.Action("_MainFooter", "_Shared")
+    </div>
+
+    <!-- jQuery 2.2.3 -->
+    <script src="~/components/jQuery/jquery-2.2.3.min.js"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="~/components/bootstrap/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/components/fastclick/fastclick.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/components/adminlte/js/app.min.js"></script>
+    <!-- Sparkline -->
+    <script src="~/components/sparkline/jquery.sparkline.min.js"></script>
+    <!-- jvectormap -->
+    <script src="~/components/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+    <script src="~/components/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+    <!-- SlimScroll 1.3.0 -->
+    <script src="~/components/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- ChartJS 1.0.1 -->
+    <script src="~/components/chartjs/Chart.min.js"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+    <script src="~/components/adminlte/js/pages/dashboard2.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="~/components/adminlte/js/demo.js"></script>
+</body>
+</html>
